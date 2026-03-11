@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+/* 키워드 행 hover 효과 */
+.keyword-row:hover {
+  background-color: #f9fafb;
+}
+
+/* 순위 변동 배지 */
+.trend-up-up { color: #ef4444; font-weight: 700; }
+.trend-up    { color: #f97316; font-weight: 600; }
+.trend-stay  { color: #6b7280; }
+.trend-down  { color: #3b82f6; font-weight: 600; }
+.trend-new   { color: #8b5cf6; font-weight: 700; font-size: 0.75rem; }
+
+/* 채널 신뢰도 도트 */
+.dot-filled { color: #f97316; }
+.dot-empty  { color: #d1d5db; }
