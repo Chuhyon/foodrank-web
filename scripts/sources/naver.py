@@ -10,20 +10,21 @@ from datetime import datetime, timedelta
 NAVER_API_URL = "https://openapi.naver.com/v1/datalab/search"
 
 # 수집 대상 키워드 그룹 (최대 5개 그룹 / 그룹당 최대 5개 키워드)
+# groupName = 다른 채널(Google Trends, YouTube)과 매칭되는 대표 키워드명
 MENU_KEYWORD_GROUPS = [
-    {"groupName": "마라탕류",   "keywords": ["마라탕", "마라샹궈", "훠궈"]},
-    {"groupName": "버블티류",   "keywords": ["버블티", "흑당버블티", "타피오카"]},
-    {"groupName": "고기류",     "keywords": ["무한리필 고기", "삼겹살", "소고기"]},
-    {"groupName": "뷔페류",     "keywords": ["한식뷔페", "무한리필", "뷔페"]},
-    {"groupName": "분식류",     "keywords": ["떡볶이", "로제떡볶이", "순대"]},
+    {"groupName": "마라탕",         "keywords": ["마라탕", "마라샹궈", "훠궈"]},
+    {"groupName": "버블티",         "keywords": ["버블티", "흑당버블티", "타피오카"]},
+    {"groupName": "무한리필 고기",  "keywords": ["무한리필 고기", "삼겹살", "소고기"]},
+    {"groupName": "한식뷔페",       "keywords": ["한식뷔페", "무한리필", "뷔페"]},
+    {"groupName": "로제떡볶이",     "keywords": ["로제떡볶이", "떡볶이", "순대"]},
 ]
 
 BRAND_KEYWORD_GROUPS = [
-    {"groupName": "커피",       "keywords": ["빽다방", "메가MGC커피", "컴포즈커피"]},
-    {"groupName": "치킨",       "keywords": ["교촌치킨", "BBQ", "bhc"]},
-    {"groupName": "버거",       "keywords": ["맘스터치", "노브랜드버거", "롯데리아"]},
-    {"groupName": "한식",       "keywords": ["청년다방", "본죽", "김밥천국"]},
-    {"groupName": "카페",       "keywords": ["투썸플레이스", "할리스", "파리바게뜨"]},
+    {"groupName": "빽다방",         "keywords": ["빽다방"]},
+    {"groupName": "교촌치킨",       "keywords": ["교촌치킨"]},
+    {"groupName": "맘스터치",       "keywords": ["맘스터치"]},
+    {"groupName": "컴포즈커피",     "keywords": ["컴포즈커피"]},
+    {"groupName": "투썸플레이스",   "keywords": ["투썸플레이스"]},
 ]
 
 
