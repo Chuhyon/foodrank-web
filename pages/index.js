@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useState } from 'react';
 import KeywordItem from '../components/KeywordItem';
 import PriceItem from '../components/PriceItem';
-import { menuTrends, brandTrends, priceTrends, collectedAt } from '../data/mockData';
+import { supabase } from '../lib/supabase';
 
 const TABS = [
   { id: 'menu',  label: '🍜 메뉴 트렌드' },
@@ -10,7 +10,52 @@ const TABS = [
   { id: 'price', label: '💰 물가 주의보' },
 ];
 
-export default function Home() {
+export async function getStaticProps() {
+  const [menuRes, brandRes, priceRes] = await Promise.all([
+    supabase
+      .from('keyword_trends')
+      .select('keyword, rank, prev_rank, trend_direction, source_count, search_template, collected_at')
+      .eq('tab', 'menu')
+      .order('rank')
+      .limit(10),
+    supabase
+      .from('keyword_trends')
+      .select('keyword, rank, prev_rank, trend_direction, source_count, search_template, collected_at')
+      .eq('tab', 'brand')
+      .order('rank')
+      .limit(10),
+    supabase
+      .from('price_trends')
+      .select('item_name, rank, today_price, yesterday_price, change_rate, direction, search_template, collected_at')
+      .order('rank')
+      .limit(10),
+  ]);
+
+  // 수집 시각 포맷 (DB에서 가장 최신 collected_at 사용)
+  const latestRaw =
+    menuRes.data?.[0]?.collected_at ||
+    priceRes.data?.[0]?.collected_at ||
+    null;
+
+  const collectedAt = latestRaw
+    ? new Date(latestRaw).toLocaleString('ko-KR', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hour12: false,
+      }).replace(/\. /g, '.').replace('.', '')
+    : '수집 대기 중';
+
+  return {
+    props: {
+      menuTrends:  menuRes.data  ?? [],
+      brandTrends: brandRes.data ?? [],
+      priceTrends: priceRes.data ?? [],
+      collectedAt,
+    },
+    revalidate: 600, // 10분 ISR 캐시
+  };
+}
+
+export default function Home({ menuTrends, brandTrends, priceTrends, collectedAt }) {
   const [activeTab, setActiveTab] = useState('menu');
 
   return (
@@ -80,21 +125,24 @@ export default function Home() {
 
             {/* 리스트 */}
             <ul>
-              {activeTab === 'menu' &&
-                menuTrends.map((item) => (
-                  <KeywordItem key={item.rank} item={item} tab="menu" />
-                ))}
-              {activeTab === 'brand' &&
-                brandTrends.map((item) => (
-                  <KeywordItem key={item.rank} item={item} tab="brand" />
-                ))}
-              {activeTab === 'price' &&
-                priceTrends.map((item) => (
-                  <PriceItem key={item.rank} item={item} />
-                ))}
+              {activeTab === 'menu' && (
+                menuTrends.length > 0
+                  ? menuTrends.map((item) => <KeywordItem key={item.rank} item={item} tab="menu" />)
+                  : <li className="text-center text-gray-400 py-10 text-sm">데이터 수집 중입니다.</li>
+              )}
+              {activeTab === 'brand' && (
+                brandTrends.length > 0
+                  ? brandTrends.map((item) => <KeywordItem key={item.rank} item={item} tab="brand" />)
+                  : <li className="text-center text-gray-400 py-10 text-sm">데이터 수집 중입니다.</li>
+              )}
+              {activeTab === 'price' && (
+                priceTrends.length > 0
+                  ? priceTrends.map((item) => <PriceItem key={item.rank} item={item} />)
+                  : <li className="text-center text-gray-400 py-10 text-sm">데이터 수집 중입니다.</li>
+              )}
             </ul>
 
-            {/* 탭별 하단 안내 문구 */}
+            {/* 탭별 하단 안내 */}
             {activeTab === 'brand' && (
               <p className="text-xs text-gray-400 text-center py-3 border-t border-gray-100">
                 검색량 기준 순위입니다. 가맹점 수 기준이 아닙니다.
@@ -107,7 +155,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* 클릭 안내 */}
           <p className="text-xs text-gray-400 text-center mt-3 px-4">
             키워드를 클릭하면 구글에서 AI 요약 정보를 바로 확인할 수 있습니다.
           </p>
