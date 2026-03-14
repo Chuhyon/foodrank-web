@@ -1,0 +1,57 @@
+name: DB 마이그레이션 (1회 실행)
+
+on:
+  workflow_dispatch:  # GitHub Actions 탭에서 수동 실행
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설치
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: pg 패키지 설치
+        run: npm install pg
+
+      - name: SQL 스키마 실행
+        run: |
+          node - <<'EOF'
+          const { Client } = require('pg');
+          const fs = require('fs');
+          const path = require('path');
+
+          const client = new Client({
+            host: 'db.djlfngujhpvoyystmosc.supabase.co',
+            port: 5432,
+            database: 'postgres',
+            user: 'postgres',
+            password: process.env.SUPABASE_DB_PASSWORD,
+            ssl: { rejectUnauthorized: false },
+          });
+
+          async function run() {
+            await client.connect();
+            console.log('✅ DB 연결 성공');
+
+            const sqlFile = path.join(__dirname, 'doc/supabase_schema.sql');
+            const sql = fs.readFileSync(sqlFile, 'utf8');
+
+            await client.query(sql);
+            console.log('✅ 스키마 + 초기 데이터 실행 완료');
+
+            await client.end();
+          }
+
+          run().catch(err => {
+            console.error('❌ 실패:', err.message);
+            process.exit(1);
+          });
+          EOF
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
