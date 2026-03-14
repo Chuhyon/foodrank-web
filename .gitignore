@@ -15,3 +15,6 @@ out/
 *.pem
 npm-debug.log*
 .vercel
+
+# 로컬 전용 — 계정·토큰·API 정보 (절대 커밋 금지)
+doc/CREDENTIALS.md
