@@ -78,7 +78,11 @@
 
 ### 4단계 — 버그 수정 (완료)
 
-#### 채널 신뢰도(source_count) 항상 1 표시 버그
+#### 키워드 클릭 시 구글 검색어 "null" 표시 버그 (ERR-007)
+- **원인**: `supabase_writer.py`가 `keyword_trends` 저장 시 `search_template` 누락 + `searchConnect.js`에서 null 처리 없음
+- **수정**: `searchConnect.js`에 `searchTemplate || keyword` fallback 추가, `supabase_writer.py`에 기본 템플릿 생성 추가
+
+#### 채널 신뢰도(source_count) 항상 1 표시 버그 (ERR-006)
 - **원인**: `naver.py`의 `groupName`이 카테고리명("마라탕류")을 사용해 다른 채널("마라탕")과 키 불일치
 - **수정**: `groupName`을 Google Trends/YouTube와 동일한 대표 키워드명으로 변경
 

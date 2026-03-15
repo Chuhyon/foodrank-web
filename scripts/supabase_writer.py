@@ -40,6 +40,12 @@ def save_keyword_trends(aggregated: list, prev_ranks: dict, tab: str) -> None:
         keyword = item["keyword"]
         prev_rank = prev_ranks.get(keyword)
 
+        # 기본 검색 템플릿: 탭에 따라 다른 문구 사용
+        if tab == "brand":
+            search_template = f"{keyword} 매장"
+        else:
+            search_template = f"{keyword} 맛집"
+
         rows.append({
             "keyword":         keyword,
             "tab":             tab,
@@ -49,6 +55,7 @@ def save_keyword_trends(aggregated: list, prev_ranks: dict, tab: str) -> None:
             "trend_direction": calculate_trend_direction(rank, prev_rank),
             "source_scores":   item["source_scores"],
             "source_count":    item["source_count"],
+            "search_template": search_template,
             "collected_at":    collected_at,
         })
 
