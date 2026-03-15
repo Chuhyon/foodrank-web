@@ -90,6 +90,26 @@
 
 ---
 
+---
+
+## ARCH-001 | 고정 키워드 → 동적 키워드 수집 구조 전환 (2026-03-15)
+
+- **배경**: 고정 키워드 목록은 실제 실시간 트렌드를 반영하지 못함
+- **변경 내용**:
+  - Google Trends: `trending_searches('south_korea')` 로 실시간 급상승어 발견
+  - 네이버 DataLab: 고정 5그룹 → 다른 채널 TOP10 키워드 검증(validator)으로 역할 변경
+  - 신규 채널 3개 추가: 네이버 블로그·뉴스·쇼핑 (기존 API 키 재사용)
+  - `food_filter.py`: 공통 음식 키워드 필터·추출 로직 분리
+  - `aggregator.py`: 4채널 → 7채널, positional args → keyword args
+  - `collect_all.py`: 단일 단계 → 2단계 파이프라인 (발견 → 검증 → 집계)
+- **주의사항**:
+  - Google Trends `trending_searches` 는 일 단위 갱신 (시간당 변경 없음)
+  - 음식 트렌드가 실시간 급상승에 없으면 `related_queries` fallback 사용
+  - 네이버 쇼핑 쇼핑 검색 total 값은 재고 수량 포함 — 순수 트렌드 지표 아님 (보조 신호)
+  - 신규 채널 추가 시 `BASE_WEIGHTS` 합계 1.0 유지 필수
+
+---
+
 ## 체크리스트 — 신규 기능 개발 시
 
 - [ ] DB nullable 컬럼은 프론트에서 반드시 fallback 처리

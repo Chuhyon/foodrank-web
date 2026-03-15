@@ -1,13 +1,17 @@
 """
 다중 채널 가중치 집계 — FRD-01 §5 통합 집계 공식 구현
+채널: naver(validator), google, blog, news, shopping, youtube, x
 """
 from typing import Optional
 
 BASE_WEIGHTS = {
-    "naver":  0.35,
-    "google": 0.25,
-    "youtube": 0.25,
-    "x":      0.15,
+    "naver":    0.20,  # 네이버 데이터랩 (상위 키워드 검색량 검증)
+    "google":   0.20,  # Google Trends 급상승 검색어
+    "blog":     0.15,  # 네이버 블로그 (맛집 포스트 언급량)
+    "youtube":  0.15,  # YouTube 인기 영상 언급량
+    "news":     0.10,  # 네이버 뉴스 (외식·식품 기사 언급량)
+    "shopping": 0.10,  # 네이버 쇼핑 검색량
+    "x":        0.10,  # X(Twitter) 언급량
 }
 
 
@@ -38,7 +42,7 @@ def calculate_trend_direction(current_rank: int, prev_rank: Optional[int]) -> st
     """순위 변동 방향 계산 — FRD-01 §5"""
     if prev_rank is None:
         return "new"
-    diff = prev_rank - current_rank  # 양수 = 상승
+    diff = prev_rank - current_rank
     if diff >= 3:
         return "up_up"
     if diff >= 1:
@@ -49,21 +53,32 @@ def calculate_trend_direction(current_rank: int, prev_rank: Optional[int]) -> st
 
 
 def aggregate(
-    naver_scores: dict,
-    google_scores: dict,
-    youtube_scores: dict,
-    x_scores: dict,
+    naver_scores:    dict = None,
+    google_scores:   dict = None,
+    blog_scores:     dict = None,
+    youtube_scores:  dict = None,
+    news_scores:     dict = None,
+    shopping_scores: dict = None,
+    x_scores:        dict = None,
 ) -> list:
     """
-    4개 채널 점수를 가중치 합산하여 TOP30 순위 반환
+    7개 채널 점수를 가중치 합산하여 TOP30 순위 반환
+    None이거나 빈 dict인 채널은 실패로 간주해 가중치 재분배
     반환: [{"keyword", "score", "source_scores", "source_count"}, ...]
     """
-    # 실패 채널 파악
-    failed = []
-    if not naver_scores:   failed.append("naver")
-    if not google_scores:  failed.append("google")
-    if not youtube_scores: failed.append("youtube")
-    if not x_scores:       failed.append("x")
+    channel_data = {
+        "naver":    naver_scores    or {},
+        "google":   google_scores   or {},
+        "blog":     blog_scores     or {},
+        "youtube":  youtube_scores  or {},
+        "news":     news_scores     or {},
+        "shopping": shopping_scores or {},
+        "x":        x_scores        or {},
+    }
+
+    failed = [ch for ch, scores in channel_data.items() if not scores]
+    if failed:
+        print(f"[Aggregator] 실패 채널: {failed} → 가중치 재분배")
 
     weights = redistribute_weights(BASE_WEIGHTS, failed)
     if not weights:
@@ -71,16 +86,11 @@ def aggregate(
         return []
 
     # 채널별 정규화
-    norm = {
-        "naver":   normalize_scores(naver_scores),
-        "google":  normalize_scores(google_scores),
-        "youtube": normalize_scores(youtube_scores),
-        "x":       normalize_scores(x_scores),
-    }
+    norm = {ch: normalize_scores(scores) for ch, scores in channel_data.items()}
 
     # 전체 키워드 유니온
-    all_keywords = set()
-    for scores in [naver_scores, google_scores, youtube_scores, x_scores]:
+    all_keywords: set = set()
+    for scores in channel_data.values():
         all_keywords.update(scores.keys())
 
     results = []
@@ -89,22 +99,20 @@ def aggregate(
         source_scores = {}
         source_count = 0
 
-        for source, weight in weights.items():
-            raw = {"naver": naver_scores, "google": google_scores,
-                   "youtube": youtube_scores, "x": x_scores}[source]
+        for ch, weight in weights.items():
+            raw = channel_data[ch]
             if keyword in raw:
-                normalized = norm[source].get(keyword, 0)
+                normalized = norm[ch].get(keyword, 0)
                 weighted_sum += normalized * weight
-                source_scores[source] = round(raw[keyword], 1)
+                source_scores[ch] = round(raw[keyword], 1)
                 source_count += 1
 
         results.append({
-            "keyword": keyword,
-            "score": round(weighted_sum, 2),
+            "keyword":       keyword,
+            "score":         round(weighted_sum, 2),
             "source_scores": source_scores,
-            "source_count": source_count,
+            "source_count":  source_count,
         })
 
-    # 점수 내림차순 정렬 → TOP30
     results.sort(key=lambda x: x["score"], reverse=True)
     return results[:30]
