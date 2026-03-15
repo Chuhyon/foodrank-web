@@ -2,7 +2,9 @@ import Head from 'next/head';
 import { useState } from 'react';
 import KeywordItem from '../components/KeywordItem';
 import PriceItem from '../components/PriceItem';
+import CookieConsent from '../components/CookieConsent';
 import { supabase } from '../lib/supabase';
+import { trackTabSwitch } from '../utils/analytics';
 
 const TABS = [
   { id: 'menu',  label: '🍜 메뉴 트렌드' },
@@ -58,6 +60,13 @@ export async function getStaticProps() {
 export default function Home({ menuTrends, brandTrends, priceTrends, collectedAt }) {
   const [activeTab, setActiveTab] = useState('menu');
 
+  function handleTabChange(tabId) {
+    if (tabId !== activeTab) {
+      trackTabSwitch(activeTab, tabId);
+      setActiveTab(tabId);
+    }
+  }
+
   return (
     <>
       <Head>
@@ -87,7 +96,7 @@ export default function Home({ menuTrends, brandTrends, priceTrends, collectedAt
             {TABS.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${
                   activeTab === tab.id
                     ? 'border-orange-500 text-orange-600'
@@ -159,6 +168,8 @@ export default function Home({ menuTrends, brandTrends, priceTrends, collectedAt
             키워드를 클릭하면 구글에서 AI 요약 정보를 바로 확인할 수 있습니다.
           </p>
         </main>
+
+        <CookieConsent />
 
         {/* Footer */}
         <footer className="py-4 text-center text-xs text-gray-400 border-t border-gray-100 bg-white mt-4">

@@ -17,10 +17,12 @@ export default function KeywordItem({ item, tab }) {
       className="keyword-row flex items-center gap-3 px-4 py-3 cursor-pointer border-b border-gray-100 last:border-0 transition-colors"
       onClick={() =>
         handleKeywordClick({
-          keyword: item.keyword,
+          keyword:       item.keyword,
           tab,
-          rank: item.rank,
+          rank:          item.rank,
           searchTemplate: item.search_template,
+          trendDirection: item.trend_direction,
+          sourceCount:    item.source_count,
         })
       }
     >
