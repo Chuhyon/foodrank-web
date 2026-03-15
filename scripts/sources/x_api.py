@@ -7,7 +7,7 @@ API 신청: https://developer.twitter.com/en/portal/dashboard
 import os
 import requests
 from collections import Counter
-from food_filter import extract_menu_keywords, extract_brand_keywords
+from .food_filter import extract_menu_keywords, extract_brand_keywords
 
 SEARCH_URL = "https://api.twitter.com/2/tweets/search/recent"
 

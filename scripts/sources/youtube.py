@@ -6,7 +6,7 @@ API 발급: https://console.cloud.google.com/ → YouTube Data API v3 활성화
 import os
 from googleapiclient.discovery import build
 from collections import Counter
-from food_filter import extract_menu_keywords, extract_brand_keywords
+from .food_filter import extract_menu_keywords, extract_brand_keywords
 
 
 def _build_youtube():

@@ -4,7 +4,7 @@
 """
 import os
 import requests
-from food_filter import MENU_KEYWORDS, BRAND_KEYWORDS
+from .food_filter import MENU_KEYWORDS, BRAND_KEYWORDS
 
 NAVER_SHOP_URL = "https://openapi.naver.com/v1/search/shop.json"
 

@@ -5,7 +5,7 @@
 import os
 import requests
 from collections import Counter
-from food_filter import MENU_KEYWORDS, BRAND_KEYWORDS, extract_menu_keywords, extract_brand_keywords
+from .food_filter import MENU_KEYWORDS, BRAND_KEYWORDS, extract_menu_keywords, extract_brand_keywords
 
 NAVER_BLOG_URL = "https://openapi.naver.com/v1/search/blog.json"
 
