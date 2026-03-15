@@ -82,3 +82,19 @@ def extract_menu_keywords(text: str) -> list:
 def extract_brand_keywords(text: str) -> list:
     """텍스트에서 브랜드 키워드 추출"""
     return [kw for kw in BRAND_KEYWORDS if kw in text]
+
+
+def extract_food_term(phrase: str) -> str | None:
+    """
+    복합 구절에서 핵심 음식 키워드 추출
+    예) "광양 맛집" → None (음식 단어 없음)
+        "마라탕 맛집 추천" → "마라탕"
+        "빽다방 신메뉴" → "빽다방"
+    """
+    for kw in BRAND_KEYWORDS:
+        if kw in phrase:
+            return kw
+    for kw in MENU_KEYWORDS:
+        if kw in phrase:
+            return kw
+    return None
